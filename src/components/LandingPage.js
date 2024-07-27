@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Container, Typography, Button, Box } from '@mui/material';
 import Typewriter from 'typewriter-effect';
-import Logo from './images/logo.png';
+import Logo from '../images/logo.png';
 
 const LandingPage = () => {
   return (

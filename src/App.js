@@ -1,9 +1,9 @@
 import React from 'react';
 import './index.css';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import CompanyDetails from './CompanyDetails';
-import CompanyList from './CompanyList';
-import LandingPage from './LandingPage';
+import CompanyDetails from './components/CompanyDetails';
+import CompanyList from './components/CompanyList';
+import LandingPage from './components/LandingPage';
 
 function App() {
   return (

@@ -1,25 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import { InputAdornment, TextField, Table, TableHead, TableBody, TableRow, TableCell, Container, Typography, Paper } from '@mui/material';
+import { TextField, Table, TableHead, TableBody, TableRow, TableCell, Container, Typography, Paper, CircularProgress, Alert } from '@mui/material';
 import { motion } from 'framer-motion';
-import SearchIcon from '@mui/icons-material/Search';
-import { apiEndpoints, axiosConfig } from './api_endpoints';
+import { apiEndpoints, axiosConfig } from '../constants/config';
 
 const CompanyList = () => {
     const [companies, setCompanies] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
-    const [companyName, setCompanyName] = useState('');
     const [filteredCompanies, setFilteredCompanies] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
     const fetchCompanyList = async () => {
         try {
             const response = await axios.get(apiEndpoints.baseURL + 'companies', axiosConfig);
             setCompanies(response.data);
             setFilteredCompanies(response.data);
-            console.log(response.data);
+            setError('');  // Clear error if the request is successful
         } catch (error) {
-            console.error("There was an error fetching the companies!", error);
+            setError("There was an error fetching the companies!");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -34,8 +36,40 @@ const CompanyList = () => {
         fetchCompanyList();
     }, []);
 
+    if (loading) {
+        return (
+            <Container
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    minHeight: '100vh',
+                }}
+            >
+                <CircularProgress />
+            </Container>
+        );
+    }
+
+    if (error) {
+        return (
+            <Container
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    minHeight: '100vh',
+                    flexWrap: 'overflow',
+                    flexDirection: 'column',
+                }}
+            >
+                <Alert severity="error">{error}</Alert>
+            </Container>
+        );
+    }
+
     return (
-        <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: '10px', flexWrap: 'overflow' }}>
             <TextField
                 label="Search companies..."
                 variant="filled"
@@ -44,9 +78,9 @@ const CompanyList = () => {
                 sx={{ marginBottom: 2, marginTop: 2, backgroundColor: 'white', width: '50%' }}
             />
             <Paper elevation={3} sx={{ width: '50%', margin: 'auto' }}>
-                <Table stickyHeader sx={{ minWidth: 300 }}>
-                    <TableHead>
-                        <TableRow>
+                <Table>
+                    <TableHead >
+                        <TableRow >
                             <TableCell align="center">
                                 <Typography variant="h5" sx={{fontWeight: 'bold'}}>List of Companies</Typography>
                             </TableCell>
@@ -62,8 +96,8 @@ const CompanyList = () => {
                             >
                                 <TableRow>
                                     <TableCell align="center">
-                                        <Link to={`/companies/${company.company_id}`} onClick={() => setCompanyName(company.name)} style={{ textDecoration: 'none', color: 'inherit' }}>
-                                            <Typography variant="body1" sx={{ '&:hover': { color: 'primary.main', fontWeight: 'bold' } }}>
+                                        <Link to={`/companies/${company.company_id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                            <Typography variant="body1" sx={{ '&:hover': { color: 'primary.main', fontWeight: 'bold'},  }}>
                                                 {company.name} <br />
                                                 {company.address}
                                             </Typography>

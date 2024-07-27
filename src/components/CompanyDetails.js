@@ -1,30 +1,82 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams, Route, Routes, Link, useNavigate } from 'react-router-dom';
-import { Button, Typography, List, Card, CardContent, Container, CircularProgress } from '@mui/material';
+import { Button, Typography, List, Card, CardContent, Container, CircularProgress, Alert } from '@mui/material';
 import LocationDetails from './LocationDetails';
 import { motion } from 'framer-motion';
-import { apiEndpoints, axiosConfig } from './api_endpoints';
+import { apiEndpoints, axiosConfig } from '../constants/config';
 
 function CompanyDetails({ companyName }) {
     const { companyId } = useParams();
     const [companyDetails, setCompanyDetails] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
     const navigate = useNavigate();
 
-    useEffect(() => {
-        const fetchCompanyDetails = async () => {
-            console.log(`Fetching details for company ID: ${companyId}`);
-            try {
-                const response = await axios.get(apiEndpoints.baseURL + `companies/${companyId}`, axiosConfig);
-                console.log('Company details:', response.data);
-                setCompanyDetails(response.data);
-            } catch (error) {
-                console.error("There was an error fetching the company details!", error);
-            }
-        };
+    const fetchCompanyDetails = async () => {
+        try {
+            const response = await axios.get(`${apiEndpoints.baseURL}companies/${companyId}`, axiosConfig);
+            setCompanyDetails(response.data);
+            setError('');  // Clear error if the request is successful
+        } catch (error) {
+            setError("There was an error fetching the company details!");
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    useEffect(() => {
         fetchCompanyDetails();
     }, [companyId]);
+
+    if (loading) {
+        return (
+            <Container
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    minHeight: '100vh',
+                }}
+            >
+                <CircularProgress />
+            </Container>
+        );
+    }
+
+    if (error) {
+        return (
+            <Container
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    minHeight: '100vh',
+                    flexDirection: 'column',
+                }}
+            >
+                <Alert severity="error">{error}</Alert>
+                <Button
+                    variant="outlined"
+                    size="large"
+                    onClick={() => navigate("/companies")}
+                    sx={{
+                        marginTop: 2,
+                        backgroundColor: '#066ebe',
+                        color: 'white',
+                        borderColor: '#066ebe',
+                        '&:hover': {
+                            backgroundColor: 'white',
+                            color: '#066ebe',
+                            borderColor: 'black',
+                        },
+                    }}
+                >
+                    Back to Company List
+                </Button>
+            </Container>
+        );
+    }
 
     if (!companyDetails || companyDetails.length === 0) {
         return (
@@ -44,31 +96,31 @@ function CompanyDetails({ companyName }) {
     return (
         <Container>
             <Button
-    variant="outlined"
-    size="large"
-    onClick={() => navigate("/companies")}
-    sx={{
-        marginBottom: 2,
-        marginTop: 4,
-        backgroundColor: '#066ebe',
-        color: 'white',
-        borderColor: '#066ebe',
-        '&:hover': {
-            backgroundColor: 'white',
-            color: '#066ebe',
-            borderColor: 'black',
-        },
-    }}
->
-    Company List
-</Button>
+                variant="outlined"
+                size="large"
+                onClick={() => navigate("/companies")}
+                sx={{
+                    marginBottom: 2,
+                    marginTop: 4,
+                    backgroundColor: '#066ebe',
+                    color: 'white',
+                    borderColor: '#066ebe',
+                    '&:hover': {
+                        backgroundColor: 'white',
+                        color: '#066ebe',
+                        borderColor: 'black',
+                    },
+                }}
+            >
+                Company List
+            </Button>
             <Typography variant="h4" component="h1" gutterBottom align="center">
                 {companyName}
             </Typography>
             <Typography variant="h4" component="h2" gutterBottom align="center" sx={{fontWeight: 'bold'}}>
                 Locations
             </Typography>
-            <List>
+            <List sx={{width: '100%'}}>
                 {companyDetails.map(location => (
                     <motion.div
                         key={location.location_id}
